@@ -8,9 +8,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.netology.web.data.ApiHelper;
 import ru.netology.web.data.DataHelper;
+import ru.netology.web.data.SQLHelper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class APITest {
     @BeforeAll
@@ -23,47 +27,51 @@ public class APITest {
         SelenideLogger.removeListener("allure");
     }
 
-    public static String generateDate(Integer addMonth, String pattern) {
-        return LocalDate.now().plusMonths(addMonth).format(DateTimeFormatter.ofPattern(pattern));}
-    String getApprovedCard = "1111 2222 3333 4444";
-    String getDeclinedCard = "5555 6666 7777 8888";
+    String getApprovedCard = DataHelper.getApprovedCard();
+    String getDeclinedCard = DataHelper.getDeclinedCard();
+    String month = DataHelper.generateDate(2, "MM");
+    String year = DataHelper.generateDate(2, "yy");
+    String cvc = DataHelper.generateСVC(3);
+    String usualName = DataHelper.generateUsualName();
+
     @Test
     @DisplayName("GET запрос приложения Путешествие дня")
-    void apiGet () {
+    void apiGet() {
         ApiHelper.shouldReturnPage(200);
     }
 
     @Test
     @DisplayName("POST запрос приложения Путешествие дня формы Оплата по карте, оплата APPROVED картой")
-    void payApiAPPROVEDCard () {
-        String month = generateDate(1, "MM");
-        String year = generateDate(1, "yy");
-        var cardInfo = DataHelper.getCardInfo(getApprovedCard, "IVAN IVANOV", "321", month, year);
-        ApiHelper.testingPOSTRequestsPay(cardInfo, 200, "APPROVED");
+    void payApiAPPROVEDCard() {
+        var cardInfo = DataHelper.getCardInfo(getApprovedCard, usualName, cvc, month, year);
+        assertAll(() -> ApiHelper.testingPOSTRequestsPay(cardInfo, 200, "APPROVED"),
+                () -> assertEquals("APPROVED", SQLHelper.getPayData()[1]),
+                () -> assertEquals(SQLHelper.getUserPaymentId(), SQLHelper.getPayData()[0]));
     }
+
     @Test
     @DisplayName("POST запрос приложения Путешествие дня формы Оплата по карте, оплата DECLINED картой")
-    void payApiDECLINEDCard () {
-        String month = generateDate(1, "MM");
-        String year = generateDate(1, "yy");
-        var cardInfo = DataHelper.getCardInfo(getDeclinedCard, "IVAN IVANOV", "321", month, year);
-        ApiHelper.testingPOSTRequestsPay(cardInfo, 400, "DECLINED");
+    void payApiDECLINEDCard() {
+        var cardInfo = DataHelper.getCardInfo(getDeclinedCard, usualName, cvc, month, year);
+        assertAll(() -> ApiHelper.testingPOSTRequestsPay(cardInfo, 400, "DECLINED"),
+                () -> assertEquals("DECLINED", SQLHelper.getPayData()[1]),
+                () -> assertEquals(SQLHelper.getUserPaymentId(), SQLHelper.getPayData()[0]));
     }
 
     @Test
     @DisplayName("POST запрос приложения Путешествие дня формы Кредит по данным карты, кредит по данным APPROVED карты")
-    void creditApiAPPROVEDCard () {
-        String month = generateDate(1, "MM");
-        String year = generateDate(1, "yy");
-        var cardInfo = DataHelper.getCardInfo(getApprovedCard, "IVAN IVANOV", "321", month, year);
-        ApiHelper.testingPOSTRequestsCredit(cardInfo, 200, "APPROVED");
+    void creditApiAPPROVEDCard() {
+        var cardInfo = DataHelper.getCardInfo(getApprovedCard, usualName, cvc, month, year);
+        assertAll(() -> ApiHelper.testingPOSTRequestsCredit(cardInfo, 200, "APPROVED"),
+                () -> assertEquals("APPROVED", SQLHelper.getCreditData()[1]),
+                () -> assertEquals(SQLHelper.getUserPaymentId(), SQLHelper.getCreditData()[0]));
     }
     @Test
     @DisplayName("POST запрос приложения Путешествие дня формы Кредит по данным карты, кредит по данным DECLINED карты")
-    void creditApiDECLINEDCard () {
-        String month = generateDate(1, "MM");
-        String year = generateDate(1, "yy");
-        var cardInfo = DataHelper.getCardInfo(getDeclinedCard, "IVAN IVANOV", "321", month, year);
-        ApiHelper.testingPOSTRequestsCredit(cardInfo, 400, "DECLINED");
+    void creditApiDECLINEDCard() {
+        var cardInfo = DataHelper.getCardInfo(getDeclinedCard, usualName, cvc, month, year);
+        assertAll(() -> ApiHelper.testingPOSTRequestsCredit(cardInfo, 400, "DECLINED"),
+                () -> assertEquals("DECLINED", SQLHelper.getCreditData()[1]),
+                () -> assertEquals(SQLHelper.getUserPaymentId(), SQLHelper.getCreditData()[0]));
     }
 }
