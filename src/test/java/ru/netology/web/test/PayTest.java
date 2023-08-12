@@ -44,6 +44,13 @@ class PayTest {
     String nameWithDot = DataHelper.generateNameWithDot();
     String nameWithDash = DataHelper.generateNameWithDash();
     String minName = DataHelper.generateMinName();
+    String cyrillicName = DataHelper.generateInCyrillicName();
+    String lowercaseName = DataHelper.generateLowercaseName();
+    String numbersName = DataHelper.generateСVC(6);
+    String lessThanMinName =  DataHelper.generateLessThanMinName();
+    String lessThanCVC = DataHelper.generateСVC(2);
+    String lettersInCVC = DataHelper.generateLettersInCVC();
+
 
     @Test
     @DisplayName("Тест 1 Ввод допустимых значений в поля формы")
@@ -183,42 +190,42 @@ class PayTest {
     @Test
     @DisplayName("Тест 17 Ввод значения в поле Владелец на кириллице")
     void enteringValueInOwnerFieldInCyrillic() {
-        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, "ИВАН ИВАНОВ", cvc, month, year);
+        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, cyrillicName, cvc, month, year);
         formPage.getUser(approvedCardInfo);
         formPage.getWrongFormat(3);
     }
     @Test
     @DisplayName("Тест 18 Ввод значения в поле Владелец строчными латинскими буквами")
     void enteringValueInOwnerFieldInLowercaseLatinLetters() {
-        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, "ivan ivanov", cvc, month, year);
+        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, lowercaseName, cvc, month, year);
         formPage.getUser(approvedCardInfo);
         formPage.getWrongFormat(3);
     }
     @Test
     @DisplayName("Тест 19 Ввод значения в поле Владелец цифрами")
     void enteringValueInOwnerFieldInNumbers() {
-        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, "123456", cvc, month, year);
+        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, numbersName, cvc, month, year);
         formPage.getUser(approvedCardInfo);
         formPage.getWrongFormat(3);
     }
     @Test
     @DisplayName("Тест 20 Ввод значения в поле Владелец длинной менее допустимого")
     void enteringValueInOwnerFieldLengthLessThanAllowed() {
-        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, "I I", cvc, month, year);
+        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, lessThanMinName, cvc, month, year);
         formPage.getUser(approvedCardInfo);
         formPage.getWrongFormat(3);
     }
     @Test
     @DisplayName("Тест 21 Ввод буквенного значения в поле CVC/CVV")
     void enteringLiteralValueInCVCField() {
-        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, usualName, "абв", month, year);
+        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, usualName, lettersInCVC, month, year);
         formPage.getUser(approvedCardInfo);
         formPage.getValidationMessage(4);
     }
     @Test
     @DisplayName("Тест 22 Ввод значения в поле CVC/CVV длинной менее, чем допустимое")
     void enteringValueInCVCLongerThanAllowed() {
-        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, usualName, "12", month, year);
+        var approvedCardInfo = DataHelper.getCardInfo(getApprovedCard, usualName, lessThanCVC, month, year);
         formPage.getUser(approvedCardInfo);
         formPage.getWrongFormat(4);
     }
